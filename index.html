@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Custom Character Auction</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <div class="brand-mark">CA</div>
+    <div><div class="brand-title">CUSTOM CHARACTER AUCTION</div><div class="brand-subtitle">BUILD YOUR TEAM. OWN THE ARENA.</div></div>
+    <div class="connection" id="connection"><span></span> Connecting</div>
+  </header>
+
+  <main class="shell">
+    <section id="homeView" class="view">
+      <div class="hero">
+        <div class="eyebrow">REAL-TIME MULTIPLAYER • UP TO 3 PLAYERS</div>
+        <h1>THE <span>AUCTION</span><br>STARTS HERE.</h1>
+        <p>Bid for 15 unique characters, build your strongest team, and compete for the top power ranking.</p>
+      </div>
+      <div class="home-grid">
+        <article class="panel action-panel">
+          <div class="panel-icon">✦</div><h2>Create a room</h2>
+          <p>Start a new auction and invite your friends with a room code.</p>
+          <label for="createName">Your player name</label>
+          <input id="createName" maxlength="20" placeholder="Enter your name">
+          <button id="createBtn" class="primary full">CREATE ROOM <span>↗</span></button>
+        </article>
+        <article class="panel action-panel">
+          <div class="panel-icon">⌁</div><h2>Join a room</h2>
+          <p>Enter a room code and join an auction already waiting for players.</p>
+          <label for="joinName">Your player name</label>
+          <input id="joinName" maxlength="20" placeholder="Enter your name">
+          <label for="roomCode">Room code</label>
+          <input id="roomCode" maxlength="6" placeholder="e.g. A7K2PQ" class="code-input">
+          <button id="joinBtn" class="secondary full">JOIN ROOM <span>→</span></button>
+        </article>
+      </div>
+      <div class="rules-strip"><div><b>10,000</b><small>STARTING COINS</small></div><div><b>15</b><small>CHARACTERS</small></div><div><b>3</b><small>PLAYERS MAX</small></div><div><b>SSS</b><small>TOP TIER</small></div></div>
+    </section>
+
+    <section id="roomView" class="view hidden">
+      <div class="room-heading">
+        <div><div class="eyebrow">MULTIPLAYER LOBBY</div><h1>ROOM <span id="roomCodeLabel">------</span></h1></div>
+        <button id="leaveBtn" class="ghost">← Leave room</button>
+      </div>
+      <div class="room-layout">
+        <article class="panel">
+          <div class="panel-heading"><div><div class="eyebrow">YOUR ARENA</div><h2>Players <span id="playerCount">1/3</span></h2></div><span class="status-pill" id="roomStatus">WAITING</span></div>
+          <div id="playersList" class="players-list"></div>
+          <div class="room-code-box"><div><small>SHARE THIS ROOM CODE</small><strong id="shareCode">------</strong></div><button id="copyCode" class="secondary">COPY CODE</button></div>
+          <button id="startBtn" class="primary full">START AUCTION <span>↗</span></button>
+          <p id="hostHint" class="hint">Waiting for at least one more player. Only the host can start.</p>
+          <div id="roomMessage" class="message"></div>
+        </article>
+        <article class="panel character-preview-panel">
+          <div class="panel-heading"><div><div class="eyebrow">THE ROSTER</div><h2>15 characters</h2></div><span class="status-pill">FIXED STATS</span></div>
+          <div id="rosterGrid" class="roster-grid"></div>
+          <p class="hint">Room host can upload character images before starting the auction.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="auctionView" class="view hidden">
+      <div class="auction-top">
+        <div><div class="eyebrow">LIVE CHARACTER AUCTION</div><h1>THE <span>ARENA</span></h1></div>
+        <div class="auction-progress"><span id="auctionProgress">01 / 15</span><div class="progress-track"><i id="progressBar"></i></div></div>
+      </div>
+      <div class="auction-layout">
+        <article class="panel featured-character">
+          <div class="character-art" id="characterArt"><div class="placeholder-symbol">✦</div><span class="art-label">CHARACTER</span></div>
+          <div class="character-info">
+            <div class="character-tags"><span id="tierBadge" class="tier-badge">SSS</span><span id="rarityLabel" class="muted-tag">ULTIMATE LEGENDARY</span></div>
+            <h2 id="characterName">Sheetal</h2>
+            <p id="characterDescription">Top-ranked character.</p>
+            <div class="stat-row"><div><small>POWER LEVEL</small><strong id="characterPower">100<span>/100</span></strong></div><div><small>STARTING PRICE</small><strong id="startingPrice">3,000</strong></div></div>
+            <div class="ability-box"><small>SPECIAL ABILITY</small><b id="characterAbility">Ability to be configured</b></div>
+          </div>
+        </article>
+        <aside class="panel bidding-panel">
+          <div class="timer-wrap"><small>TIME REMAINING</small><div id="timer" class="timer">20</div><small>SECONDS</small></div>
+          <div class="current-bid"><small>CURRENT HIGHEST BID</small><strong id="highestBid">3,000</strong><span id="highestBidder">No bids yet</span></div>
+          <label for="bidAmount">Your bid (whole coins)</label>
+          <input id="bidAmount" type="number" min="1" step="1" placeholder="Enter your bid">
+          <button id="bidBtn" class="primary full">PLACE BID ↗</button>
+          <div id="bidMessage" class="message"></div>
+          <div class="bid-history"><div class="section-mini-title">LIVE BID HISTORY</div><div id="historyList"><p class="hint">No bids yet.</p></div></div>
+        </aside>
+      </div>
+      <div class="player-budget-grid" id="auctionPlayers"></div>
+    </section>
+
+    <section id="resultsView" class="view hidden">
+      <div class="results-hero"><div class="eyebrow">AUCTION COMPLETE</div><h1>THE RESULTS<br>ARE <span>IN.</span></h1><p>Every bid counted. Every character matters.</p></div>
+      <div id="winnerBanner" class="winner-banner"></div>
+      <div id="leaderboard" class="leaderboard"></div>
+      <button id="playAgainBtn" class="secondary">BACK TO HOME</button>
+    </section>
+  </main>
+  <div id="toast" class="toast"></div>
+  <script src="/client.js"></script>
+</body>
+</html>
